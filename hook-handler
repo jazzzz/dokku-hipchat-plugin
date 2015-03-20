@@ -5,34 +5,32 @@ source "$(dirname $0)/../common/functions"
 CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 source "$PLUGIN_PATH/hipchat/hipchat_dokku_functions"
 [[ $(hipchat_is_enabled) == "false" ]] && dokku_log_info1 "HipChat Notification isn't enabled for $APP." && exit 0
+# config file exists, so we can do this at this point.
+source $CONFIG
+
 dokku_log_info1 "HipChat: hook-handler called for $0 $1 $2 $3"
 HOOK=$(basename $0)
 
 # TODO: Add configurable messages.
 case "$HOOK" in 
 	pre-deploy)
-		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Starting deployment for $APP"
+		handle_hook $HOOK
 		;;
 
 	check-deploy)
-		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Checking deployment for $APP"
+		handle_hook $HOOK
 		;;
 
 	post-deploy)
-		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Deployment complete for $APP"
+		handle_hook $HOOK
 		;;
 
 	pre-build)
-		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Starting build for $APP"
+		handle_hook $HOOK
 		;;
 
 	post-build)
-		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Build complete for $APP"
+		handle_hook $HOOK
 		;;
 
 	*)

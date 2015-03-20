@@ -1,5 +1,8 @@
 # dokku-hipchat-plugin
 
+## WARNING
+Don't use this, yet. I'm still testing this.
+
 ## Installation
 ````
 	git clone https://github.com/gcohen55/dokku-hipchat-plugin.git /var/lib/dokku/plugins/hipchat
@@ -28,6 +31,20 @@ Possibilities are endless. Want to send custom messages from within a shell scri
 	dokku hipchat:send_message orderform 'Completed doing database dump pre-upgrade for backup purposes.'
 ````
 
+## Hooks
+Supported hooks today are
+````
+pre-deploy
+post-deploy
+pre-build
+post-build
+````
+
+Hook messages are configurable:
+````
+	dokku hipchat:set_hook orderform pre-deploy 'Pre-Deployment started for %APP%'
+````
+Available variables are %APP%, %HOSTNAME%, and %DATE%
 
 Reference:
 ````
@@ -38,7 +55,9 @@ Reference:
     hipchat:remove <app>                                                  Disables HipChat notifaction (this removes old config)
     hipchat:test <app>                                                    Sends a test message using previous settings
     hipchat:send_message <app> <message>                                  Sends message exactly as message, with no extra info or formatting.
+    hipchat:set_hook <app> <hook> <message>                               Customizes hook message. Set message to "DISABLE" to disable notification for specified hook.
 ````
+
 
 ## License
 

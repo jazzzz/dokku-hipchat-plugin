@@ -7,8 +7,10 @@ function show_help {
     hipchat:remove <app>                                                  Disables HipChat notifaction (this removes old config)
     hipchat:test <app>                                                    Sends a test message using previous settings
     hipchat:send_message <app> <message>                                  Sends message exactly as message, with no extra info or formatting.
+    hipchat:set_hook <app> <hook> <message>                               Customizes hook message. Set message to "DISABLE" to disable notification for specified hook.
 EOF
 }
+
 
 # if no config, this errors out w/ dokku_log_fail
 function checkconfig_fail {
@@ -21,6 +23,22 @@ function checkconfig_fail {
 function checkconfig_error {
 	[[ ! -f "$CONFIG" ]] && dokku_log_info1 "ERROR: HipChat plugin config cannot be found for $APP." && exit
 	true
+}
+
+function set_hook {
+	checkconfig_fail
+	source "$CONFIG"
+	echo "doot: ${HOOK_NOTIFICATIONS[$HOOK]}"
+
+	[[ ! ${HOOK_NOTIFICATIONS[$HOOK]} ]] && dokku_log_fail "ERROR: $HOOK is /NOT/ a definable hook."
+	true
+
+	[[ $MSG == "" ]] && dokku_log_fail "ERROR: Don't set message to something empty. If you want to disable, set to DISABLE"
+	true
+
+	HOOK_NOTIFICATIONS[$HOOK]="$MSG"
+	write_config
+	dokku_log_info1 "HipChat: $HOOK updated to $MSG."
 }
 
 function hipchat_message {
@@ -52,11 +70,31 @@ function disable_hipchat {
 }
 
 function write_config {
-    echo "HC_TOKEN=\"$HC_TOKEN\"" > "$CONFIG"
-    echo "HC_ROOM_ID=\"$HC_ROOM_ID\"" >> "$CONFIG"
-    echo "HC_FROM=\"$HC_FROM\"" >> "$CONFIG"
-    echo "HC_ENABLED=\"$HC_ENABLED\"" >> "$CONFIG"
+	CONFIG_CONTENT=$(cat - <<EOF
+HC_TOKEN="$HC_TOKEN"
+HC_ROOM_ID="$HC_ROOM_ID"
+HC_FROM="$HC_FROM"
+HC_ENABLED="$HC_ENABLED"
+declare -A HOOK_NOTIFICATIONS
+HOOK_NOTIFICATIONS[pre-deploy]="${HOOK_NOTIFICATIONS[pre-deploy]}"
+HOOK_NOTIFICATIONS[post-deploy]="${HOOK_NOTIFICATIONS[post-deploy]}"
+HOOK_NOTIFICATIONS[pre-build]="${HOOK_NOTIFICATIONS[pre-build]}"
+HOOK_NOTIFICATIONS[post-build]="${HOOK_NOTIFICATIONS[post-build]}"
+EOF
+)
+	echo "$CONFIG_CONTENT" > "$CONFIG"
     true
+}
+
+function handle_hook {
+	HOOK="$1"
+	[[ "${HOOK_NOTIFICATIONS[$HOOK]}" == "DISABLE" ]] && dokku_log_info1 "HipChat Notification disabled for hook $HOOK" && exit 0
+	dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+	MSG="${HOOK_NOTIFICATIONS[$HOOK]}"
+	MSG="${MSG/\%APP\%/$APP}"
+	MSG="${MSG/\%DATE\%/$(date)}"
+	MSG="${MSG/\%HOSTNAME\%/$(hostname -f)}"
+	hipchat_message "$MSG"
 }
 
 function remove_config {
@@ -66,6 +104,8 @@ function remove_config {
 }
 
 function write_initial_config {
+	declare -A HOOK_NOTIFICATIONS
+	populate_default_HOOK_NOTIFICATIONS
 	write_config
 	true
 }
@@ -76,4 +116,11 @@ function hipchat_info {
 	  dokku_log_info2 "$LINE"
 	done < "$CONFIG"
 	true
+}
+
+function populate_default_HOOK_NOTIFICATIONS {
+	HOOK_NOTIFICATIONS['pre-deploy']='Starting deployment for %APP%'
+	HOOK_NOTIFICATIONS['post-deploy']='Deployment complete for %APP%'
+	HOOK_NOTIFICATIONS['pre-build']='Beginning build for %APP%'
+	HOOK_NOTIFICATIONS['post-build']='Build Complete for %APP%'
 }

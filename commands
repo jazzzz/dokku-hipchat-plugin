@@ -79,6 +79,18 @@ case "$1" in
     hipchat_message "$3"
     ;;
 
+  hipchat:set_hook)
+    [[ -z $2 || -z $3 || -z $4 ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
+    verify_app_name "$2"
+    APP="$2";
+    CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
+
+    HOOK="$3"
+    MSG="$4"
+
+    HOOK="$HOOK" MSG="$MSG" set_hook
+    ;;
+
   help)
     show_help
     ;;
