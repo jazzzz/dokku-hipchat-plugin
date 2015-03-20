@@ -12,7 +12,7 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Creating HipChat config file for $APP...."
+    dokku_log_info1 "HipChat: Creating HipChat config file for $APP...."
 
     HC_TOKEN="$3" HC_ROOM_ID="$4" HC_FROM="$5" HC_ENABLED="false" write_initial_config
     ;;
@@ -23,8 +23,8 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Sending a test mesage using $APP HipChat settings..."
-    hipchat_message "test message from Dokku regarding $APP sent on $(date)"
+    dokku_log_info1 "HipChat: Sending a test mesage using $APP HipChat settings..."
+    hipchat_message "Test message from Dokku regarding $APP sent on $(date)"
     ;;
 
   hipchat:enable)
@@ -33,7 +33,7 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Enabling HipChat for $APP..."
+    dokku_log_info1 "HipChat: Enabling HipChat for $APP..."
     enable_hipchat
     ;;
 
@@ -43,7 +43,7 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Disabling HipChat for $APP..."
+    dokku_log_info1 "HipChat: Disabling HipChat for $APP..."
     disable_hipchat
     ;;
 
@@ -53,7 +53,7 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Removing HipChat config for $APP..."
+    dokku_log_info1 "HipChat: Removing HipChat config for $APP..."
     remove_config
     ;;
 
@@ -63,7 +63,7 @@ case "$1" in
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
-    dokku_log_info1 "Reading HipChat config file..."
+    dokku_log_info1 "HipChat: Reading HipChat config file..."
     hipchat_info
     ;;
 

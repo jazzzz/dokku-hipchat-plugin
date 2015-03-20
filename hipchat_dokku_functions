@@ -1,8 +1,8 @@
 function show_help {
     cat<<EOF
-    hipchat:settings <app> <hc v2token> <hc room id> <hc from>            Sets HipChat token, room id, from for app. /WILL/ overwrite old configuration. Does /NOT/ enable notifications.
+    hipchat:settings <app> <hc v2token> <hc room id> <hc from>            Sets HipChat token, room id, from for app. /WILL/ overwrite old configuration and custom notifications. Does /NOT/ enable notifications.
     hipchat:info <app>                                                    General HipChat information for app
-    hipchat:enable <app>                                                  Enables HipChat for app. Requires settings be defined using hipchat:settings
+    hipchat:enable <app>                                                  Enables HipChat for app.
     hipchat:disable <app>                                                 Disables HipChat for app. Leaves configuration behind.
     hipchat:remove <app>                                                  Disables HipChat notifaction (this removes old config)
     hipchat:test <app>                                                    Sends a test message using previous settings
@@ -28,7 +28,6 @@ function checkconfig_error {
 function set_hook {
 	checkconfig_fail
 	source "$CONFIG"
-	echo "doot: ${HOOK_NOTIFICATIONS[$HOOK]}"
 
 	[[ ! ${HOOK_NOTIFICATIONS[$HOOK]} ]] && dokku_log_fail "ERROR: $HOOK is /NOT/ a definable hook."
 	true
@@ -38,7 +37,7 @@ function set_hook {
 
 	HOOK_NOTIFICATIONS[$HOOK]="$MSG"
 	write_config
-	dokku_log_info1 "HipChat: $HOOK updated to $MSG."
+	dokku_log_info1 "HipChat: Hook $HOOK updated to $MSG."
 }
 
 function hipchat_message {
@@ -88,11 +87,11 @@ EOF
 
 function handle_hook {
 	HOOK="$1"
-	[[ "${HOOK_NOTIFICATIONS[$HOOK]}" == "DISABLE" ]] && dokku_log_info1 "HipChat Notification disabled for hook $HOOK" && exit 0
+	[[ "${HOOK_NOTIFICATIONS[$HOOK]}" == "DISABLE" ]] && dokku_log_info1 "HipChat: Notification disabled for hook $HOOK" && exit 0
 	dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
 	MSG="${HOOK_NOTIFICATIONS[$HOOK]}"
 	MSG="${MSG/\%APP\%/$APP}"
-	MSG="${MSG/\%DATE\%/$(date)}"
+	MSG="${MSG/\%DATE\%/$(date +%Y-%m-%d)}"
 	MSG="${MSG/\%HOSTNAME\%/$(hostname -f)}"
 	hipchat_message "$MSG"
 }
@@ -119,8 +118,8 @@ function hipchat_info {
 }
 
 function populate_default_HOOK_NOTIFICATIONS {
-	HOOK_NOTIFICATIONS['pre-deploy']='Starting deployment for %APP%'
-	HOOK_NOTIFICATIONS['post-deploy']='Deployment complete for %APP%'
-	HOOK_NOTIFICATIONS['pre-build']='Beginning build for %APP%'
-	HOOK_NOTIFICATIONS['post-build']='Build Complete for %APP%'
+	HOOK_NOTIFICATIONS['pre-deploy']='Starting deployment for <strong>%APP%</strong>'
+	HOOK_NOTIFICATIONS['post-deploy']='Deployment complete for <strong>%APP%</strong>'
+	HOOK_NOTIFICATIONS['pre-build']='Beginning build for <strong>%APP%</strong>'
+	HOOK_NOTIFICATIONS['post-build']='Build Complete for <strong>%APP%</strong>'
 }

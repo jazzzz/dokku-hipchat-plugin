@@ -4,7 +4,7 @@ APP="$1"; IMAGE="dokku/$APP"; CACHE_DIR="$DOKKU_ROOT/$APP/cache"
 source "$(dirname $0)/../common/functions"
 CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 source "$PLUGIN_PATH/hipchat/hipchat_dokku_functions"
-[[ $(hipchat_is_enabled) == "false" ]] && dokku_log_info1 "HipChat Notification isn't enabled for $APP." && exit 0
+[[ $(hipchat_is_enabled) == "false" ]] && dokku_log_info1 "HipChat: Notification isn't enabled for $APP." && exit 0
 # config file exists, so we can do this at this point.
 source $CONFIG
 
