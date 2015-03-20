@@ -32,7 +32,7 @@ case "$HOOK" in
 
 	post-build)
 		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
-		hipchat_message "Build comPete for $APP"
+		hipchat_message "Build complete for $APP"
 		;;
 
 	*)
