@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$(dirname $0)/../common/functions"
+source "$PLUGIN_PATH/hipchat/hipchat_dokku_functions"
+
+# list of symbolic links to make
+HOOK_LIST="pre-build post-build pre-deploy post-deploy"
+
+# functions ---
+function makelink {
+	NAME="$1"
+	[[ -f $PLUGIN_PATH/hipchat/$NAME ]] && rm "$PLUGIN_PATH/hipchat/$NAME"
+	true
+	ln -s "$PLUGIN_PATH/hipchat/hook-handler" "$PLUGIN_PATH/hipchat/$NAME"
+}
+# -------------
+
+dokku_log_info1 "Installing HipChat plugin..."
+for HOOK_NAME in $HOOK_LIST; do
+	dokku_log_info2 "Creating symbolic link for $HOOK_NAME"
+	makelink "$HOOK_NAME"
+done

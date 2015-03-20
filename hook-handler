@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+APP="$1"; IMAGE="dokku/$APP"; CACHE_DIR="$DOKKU_ROOT/$APP/cache"
+source "$(dirname $0)/../common/functions"
+CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
+source "$PLUGIN_PATH/hipchat/hipchat_dokku_functions"
+[[ $(hipchat_is_enabled) == "false" ]] && dokku_log_info1 "HipChat Notification isn't enabled for $APP." && exit 0
+dokku_log_info1 "HipChat: hook-handler called for $0 $1 $2 $3"
+HOOK=$(basename $0)
+
+# TODO: Add configurable messages.
+case "$HOOK" in 
+	pre-deploy)
+		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+		hipchat_message "Starting deployment for $APP"
+		;;
+
+	check-deploy)
+		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+		hipchat_message "Checking deployment for $APP"
+		;;
+
+	post-deploy)
+		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+		hipchat_message "Deployment complete for $APP"
+		;;
+
+	pre-build)
+		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+		hipchat_message "Starting build for $APP"
+		;;
+
+	post-build)
+		dokku_log_info1 "HipChat: Notifying HipChat for $HOOK"
+		hipchat_message "Build comPete for $APP"
+		;;
+
+	*)
+		MSG="$0 $1 $2 $3 $4 $5"
+		dokku hipchat:send_message $APP "$MSG"
+		;;
+esac
+dokku_log_info1 "HipChat: hook-handler complete."
+		

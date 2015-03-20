@@ -1,0 +1,79 @@
+function show_help {
+    cat<<EOF
+    hipchat:settings <app> <hc v2token> <hc room id> <hc from>            Sets HipChat token, room id, from for app. /WILL/ overwrite old configuration. Does /NOT/ enable notifications.
+    hipchat:info <app>                                                    General HipChat information for app
+    hipchat:enable <app>                                                  Enables HipChat for app. Requires settings be defined using hipchat:settings
+    hipchat:disable <app>                                                 Disables HipChat for app. Leaves configuration behind.
+    hipchat:remove <app>                                                  Disables HipChat notifaction (this removes old config)
+    hipchat:test <app>                                                    Sends a test message using previous settings
+    hipchat:send_message <app> <message>                                  Sends message exactly as message, with no extra info or formatting.
+EOF
+}
+
+# if no config, this errors out w/ dokku_log_fail
+function checkconfig_fail {
+	[[ ! -f "$CONFIG" ]] && dokku_log_fail "ERROR: HipChat plugin config cannot be found for $APP. Did you use hipchat:settings?"
+	true
+}
+
+# if no config, this merely prints log entry, and exits.
+# this is an important distinction (especially when called within a hook because a dokku_log_fail will stop all progress of deployment)
+function checkconfig_error {
+	[[ ! -f "$CONFIG" ]] && dokku_log_info1 "ERROR: HipChat plugin config cannot be found for $APP." && exit
+	true
+}
+
+function hipchat_message {
+	[[ $(hipchat_is_enabled) == "false" ]] && dokku_log_info1 "ERROR: HipChat plugin not enabled." && exit
+    source "$CONFIG"
+	HC_OUT=$({ echo "$1" | HIPCHAT_TOKEN="$HC_TOKEN" HIPCHAT_HIPCHAT_COLOR=green HIPCHAT_ROOM_ID="$HC_ROOM_ID" HIPCHAT_FROM="$HC_FROM" $PLUGIN_PATH/hipchat/hipchat_room_message ; })
+	[[ $HC_OUT == *"error"* ]] && dokku_log_info1 "ERROR: HipChat Message failed: $HC_OUT" && exit
+	true
+}
+
+function hipchat_is_enabled {
+	[[ ! -f "$CONFIG" ]] && echo "false" && return
+	source "$CONFIG"
+	echo "$HC_ENABLED" && return
+}
+
+function enable_hipchat {
+	checkconfig_fail
+	source "$CONFIG"
+	HC_ENABLED="true"
+	write_config
+}
+
+function disable_hipchat {
+	checkconfig_fail
+	source "$CONFIG"
+	HC_ENABLED="false"
+	write_config
+}
+
+function write_config {
+    echo "HC_TOKEN=\"$HC_TOKEN\"" > "$CONFIG"
+    echo "HC_ROOM_ID=\"$HC_ROOM_ID\"" >> "$CONFIG"
+    echo "HC_FROM=\"$HC_FROM\"" >> "$CONFIG"
+    echo "HC_ENABLED=\"$HC_ENABLED\"" >> "$CONFIG"
+    true
+}
+
+function remove_config {
+	checkconfig_fail
+	rm "$CONFIG"
+	true
+}
+
+function write_initial_config {
+	write_config
+	true
+}
+
+function hipchat_info {
+	checkconfig_fail
+	while read LINE; do
+	  dokku_log_info2 "$LINE"
+	done < "$CONFIG"
+	true
+}
