@@ -7,7 +7,7 @@ source "$PLUGIN_PATH/hipchat/hipchat_dokku_functions"
 
 case "$1" in
   hipchat:settings)
-    [[ -z $2 || -z $3 || -z $4 || -z $5 ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
+    [[ -z "${*:5}" ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
     verify_app_name "$2"
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
@@ -68,19 +68,21 @@ case "$1" in
     ;;
 
   hipchat:send_message)
-    [[ -z $2 || -z $3 ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
+    [[ -z "${*:3}" ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
     verify_app_name "$2"
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
 
 
     dokku_log_info1 "Sending HipChat message..."
-    dokku_log_info2 "$3"
-    hipchat_message "$3"
+    shift; shift;
+    MSG="$@"
+    dokku_log_info2 "$MSG"
+    hipchat_message "$MSG"
     ;;
 
   hipchat:set_hook)
-    [[ -z $2 || -z $3 || -z $4 ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
+    [[ -z "${*:4}" ]] && echo "Usage: $(show_help|grep "$1")" && exit 1
     verify_app_name "$2"
     APP="$2";
     CONFIG="$DOKKU_ROOT/$APP/hipchat.conf";
