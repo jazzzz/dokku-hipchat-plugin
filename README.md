@@ -1,8 +1,5 @@
 # dokku-hipchat-plugin
 
-## WARNING
-Don't use this, yet. I'm still testing this.
-
 ## Installation
 ````
 	git clone https://github.com/gcohen55/dokku-hipchat-plugin.git /var/lib/dokku/plugins/hipchat
@@ -31,7 +28,7 @@ Possibilities are endless. Want to send custom messages from within a shell scri
 	dokku hipchat:send_message orderform 'Completed doing database dump pre-upgrade for backup purposes.'
 ````
 
-## Hooks
+## Hooks Customization
 Supported hooks today are
 ````
 pre-deploy
@@ -46,7 +43,7 @@ Hook messages are configurable:
 ````
 Available variables are %APP%, %HOSTNAME%, and %DATE%
 
-Reference:
+## Reference
 ````
     hipchat:settings <app> <hc v2token> <hc room id> <hc from>            Sets HipChat token, room id, from for app. /WILL/ overwrite old configuration. Does /NOT/ enable notifications.
     hipchat:info <app>                                                    General HipChat information for app
