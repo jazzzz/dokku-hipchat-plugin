@@ -2,7 +2,7 @@
 
 ## Installation
 ````
-	git clone https://github.com/gcohen55/dokku-hipchat-plugin.git /var/lib/plugins/hipchat
+	git clone https://github.com/gcohen55/dokku-hipchat-plugin.git /var/lib/dokku/plugins/hipchat
 	dokku plugins-install
 ````
 
